@@ -14,6 +14,15 @@ echo "source /opt/venv/bin/activate" > /root/.bashrc
 echo "source /opt/venv/bin/activate" > /home/rstudio/.bashrc
 chown rstudio:rstudio /home/rstudio/.bashrc
 
+cat << EOF > /home/rstudio/.bash_profile
+if [ -f ~/.profile ]; then
+  . ~/.profile
+fi
+
+. ~/.bashrc
+EOF
+chown rstudio:rstudio /home/rstudio/.bash_profile
+
 # pandas, seabornをインストール
 python3 -m pip --no-cache-dir install pandas seaborn
 
