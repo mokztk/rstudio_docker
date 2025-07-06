@@ -35,6 +35,8 @@ RUN set -x \
         language-pack-ja-base \
         libxt6 \
         ssh \
+        nodejs \
+        npm \
     && /usr/sbin/update-locale LANG=ja_JP.UTF-8 LANGUAGE="ja_JP:ja" \
     && /bin/bash -c "source /etc/default/locale" \
     && ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime \
