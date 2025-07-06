@@ -9,8 +9,11 @@
 FROM rocker/r-ver:4.5.0 AS tidyverse_cli
 
 # RStudio, S6 suprevisor は入れずに rocker/tidyverse 相当のパッケージを導入（行番号は @8cd5d36 準拠）
+# pandoc, quarto は rocker/rstudio:4.5.0 と同じバージョンを指定
 
-ENV DEFAULT_USER="rstudio"
+ENV DEFAULT_USER="rstudio" \
+    PANDOC_VERSION="3.7.0.2" \
+    QUARTO_VERSION="1.6.42"
 RUN sed -e "40,75d; 80,120d; 125,128d; 133,138d" /rocker_scripts/install_rstudio.sh | bash
 RUN /rocker_scripts/install_pandoc.sh
 RUN /rocker_scripts/install_quarto.sh
