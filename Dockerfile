@@ -47,6 +47,7 @@ CMD ["R"]
 FROM tidyverse_cli AS r_remote
 
 # 日本語設定と必要なライブラリ（Rパッケージ用は別途スクリプト内で導入）
+# Node.js/npm は n を使って最新の LTS に入れ替える
 # ${R_HOME}/etc/Renviron のタイムゾーン指定（Etc/UTC）も上書きしておく
 RUN set -x \
     && apt-get update \
@@ -55,6 +56,10 @@ RUN set -x \
         ssh \
         nodejs \
         npm \
+    && npm install -g n \
+    && n lts \
+    && apt-get purge -y nodejs npm \
+    && apt-get autoremove -y \
     && /usr/sbin/update-locale LANG=ja_JP.UTF-8 LANGUAGE="ja_JP:ja" \
     && /bin/bash -c "source /etc/default/locale" \
     && ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime \
