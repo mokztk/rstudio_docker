@@ -70,13 +70,16 @@ radian をホストPCで使うときは
 docker exec -it <container name> /opt/venv/bin/radian
 ```
 
+### Node.js / npm / pnpm
+
+[Gemini CLI](https://github.com/google-gemini/gemini-cli) などを導入できるよう、 n（Node.js のバージョンマネージャー）経由で Ubuntu の apt にあるバージョンより新しいものを導入
+
+- 2025-06現在の LTS である Node v22系＋ npm v10系
+- [pnpm](https://pnpm.io/ja/): ユーザー rstudio が利用する場合、リリース後1週間以上経過したパッケージのみに制限
+
 ### [Microsoft Edit](https://github.com/microsoft/edit)
 
 - CLI用のテキストエディタがないので、`msedit` の名前で使用できるように導入しておく
-
-### 公開鍵暗号による remote SSH 接続
-
-パスワード認証（ユーザー `rstudio`、パスワードの初期設定は下で設定した `password`）での SSH 接続に加えて、`/home/rstudio/.ssh/authorized_keys` に公開鍵を登録すればパスワード不要の公開鍵暗号での接続も可能になる。
 
 ### TinyTeX
 
@@ -84,16 +87,20 @@ docker exec -it <container name> /opt/venv/bin/radian
 - 必要に応じてユーザー `rstudio` 権限でセットアップスクリプト `/my_script/install_tinytex.sh` を実行する（RStudio の Terminal で可）
     - R4.3系以降メンテナンスしていないが、TeX Live 2022 frozen ベースで LuaLaTeX / XeLaTeX で日本語PDFを作成できる環境が準備できるはず
 
-### 環境変数 PASSWORD の仮設定（RStudio Server のログインパスワード）
+### 環境変数 PASSWORD の仮設定（RStudio Server 版）
 
 - 初期パスワード `rstudio` のままでは RStudio Server が使用できないので、Docker Desktop など -e PASSWORD=... が設定できないGUIでも起動テストできるように仮のパスワード `password` を埋め込んでおく
 - 更に、普段使いのため `DISABLE_AUTH=true` を埋め込む。パスワードが必要なときは、起動時に `-e DISABLE_AUTH=false`
 
-### rootless モードの解除 (Arm64)
+### rootless モードの解除 (RStudio server 版)
 
 - arm64版の rocker/rstudio は rootless モードで動いており、起動時にユーザー rstudio が削除される
 - amd64(x86_64)版と設定ファイルなどを共用するために rootless モードを解除して、従来どおりユーザー rstudio を使用する
 - 今後、amd64 も rootless になるようならば要検討
+
+### 公開鍵暗号による remote SSH 接続（SSH server 版）
+
+パスワード認証（ユーザー・パスワードとも `rstudio`）での SSH 接続に加えて、`/home/rstudio/.ssh/authorized_keys` に公開鍵を登録すればパスワード不要の公開鍵暗号での接続も可能になる。
 
 ## History
 
