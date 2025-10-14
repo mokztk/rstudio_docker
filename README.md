@@ -1,18 +1,30 @@
 # About this image
 
-- **rocker/rstudio** に rocker/tidyverse 相当のパッケージと日本語設定、頻用パッケージをインストールした作業用イメージ
-    - rocker/rstudio を出発点にすることで Amd64 (x86_64) / Arm64 の Dockerfile を共通化
+- **rocker/r-ver** を元に rocker/tidyverse 相当のパッケージと日本語設定、頻用パッケージをインストールした作業用イメージ
     - rocker/tidyverse 相当のうち、容量の大きな dbplyr database backend は RSQLite 以外を省略
+- 使用方法別に、2つのイメージを生成
+    - **RStudio server**: rocker project オリジナルのインストールスクリプトで rocker/rstudio 相当の機能を追加
+    - **SSH server**: RStudio server は導入せず、[Positron](https://positron.posit.co/) などから remote SSH 接続するため SSH server を起動
 - CLI作業用に、[radian: A 21 century R console](https://github.com/randy3k/radian) と [Microsoft Edit](https://github.com/microsoft/edit) を追加する
 - `reticulate` で最低限の python 連携も使用できるようにする
 - [rocker-org/rocker-versioned2](https://github.com/rocker-org/rocker-versioned2) のように、目的別のスクリプトを使って Dockerfile 自体は極力シンプルにしてみる
 
 ```
-docker image build -t "mokztk/rstudio:4.5.0" .
-docker run --rm -d -p 8787:8787 --name rstudio mokztk/rstudio:4.5.0
+# RStudio server, SSH server まとめて作成・起動
+docker compose build
+docker compose up -d
 
-# rocker/tidyverse 相当までの build
-docker image build --target tidyverse -t "mokztk/tidyverse:4.5.0" .
+# 個別に build
+docker compose rstudio
+docker compose ssh
+
+# または、docker compose を使わずに個別 build する場合
+docker image build --target rstudio -t "mokztk/rstudio:4.5.0" .
+docker image build --target ssh -t "mokztk/r_remote:4.5.0" .
+
+# 個別に起動
+docker run --rm -d -p 8787:8787 --name rstudio mokztk/rstudio:4.5.0
+docker run --rm -d -p 2222:22 --name r_remote mokztk/r_remote:4.5.0
 ```
 
 ## 詳細
@@ -62,9 +74,7 @@ docker exec -it <container name> /opt/venv/bin/radian
 
 - CLI用のテキストエディタがないので、`msedit` の名前で使用できるように導入しておく
 
-### remote SSH接続
-
-[Positron](https://positron.posit.co/) などから remote SSH で接続できるよう、sshd も起動させるようにした。
+### 公開鍵暗号による remote SSH 接続
 
 パスワード認証（ユーザー `rstudio`、パスワードの初期設定は下で設定した `password`）での SSH 接続に加えて、`/home/rstudio/.ssh/authorized_keys` に公開鍵を登録すればパスワード不要の公開鍵暗号での接続も可能になる。
 
@@ -106,3 +116,4 @@ docker exec -it <container name> /opt/venv/bin/radian
 - **2024-04-26** 🔖[4.3.3_2024Apr](https://github.com/mokztk/RStudio_docker/releases/tag/4.3.3_2024Apr) : `rocker/rstudio:4.3.3` をベースにQuarto 1.4を追加。Amd64/Arm64のDockerfileを1本化
 - **2025-03-06** 🔖[4.4.2_2025Mar](https://github.com/mokztk/RStudio_docker/releases/tag/4.4.2_2025Mar) : `rocker/rstudio:4.4.2` ベースに更新
 - **2025-06-15** 🔖[4.5.0_2025Jun](https://github.com/mokztk/RStudio_docker/releases/tag/4.5.0_2025Jun) : `rocker/rstudio:4.5.0` ベースに更新。remote SSH接続できるよう設定を追加
+- **2025-10-15** RStudio server版（こちらからは remote SSH 接続を削除）と remote SSH 版を一本化
