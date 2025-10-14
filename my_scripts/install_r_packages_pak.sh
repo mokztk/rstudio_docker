@@ -59,6 +59,7 @@ pak::pak(c(
     "tidyplots",
     "tinytable"
 ))
+pak::pak_cleanup(force = TRUE)
 EOF
 
 # R.cache (imported by styler) で使用するキャッシュディレクトリを準備
@@ -66,8 +67,8 @@ mkdir -p /home/rstudio/.cache/R/R.cache
 chown -R rstudio:rstudio /home/rstudio/.cache
 
 # Clean up
-Rscript -e "pak::pak_cleanup(force = TRUE)"
 rm -rf /tmp/downloaded_packages
+rm -rf /tmp/Rtmp*
 
 apt-get clean
 rm -rf /var/lib/apt/lists/*
