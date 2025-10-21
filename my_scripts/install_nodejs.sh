@@ -9,6 +9,7 @@ apt-get install -y --no-install-recommends nodejs npm
 # Node バージョン管理ツールの n を導入し、2025-06 時点の最新 LTS = v22系をインストール
 npm install -g n
 n v22
+hash -r
 
 # apt で入れた古い Node.js と npm をアンイストール
 apt-get purge -y nodejs npm
