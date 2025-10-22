@@ -61,8 +61,8 @@ COPY --from=ghcr.io/astral-sh/uv:0.9.4 /uv /opt/uv/bin/
 # 各スクリプトは改行コード LF(UNIX) でないとエラーになる
 COPY my_scripts /my_scripts
 RUN chmod 775 my_scripts/*
-RUN /my_scripts/install_r_packages.sh
-#RUN /my_scripts/install_r_packages_pak.sh
+#RUN /my_scripts/install_r_packages.sh
+RUN /my_scripts/install_r_packages_pak.sh
 #RUN /my_scripts/install_radian.sh
 RUN /my_scripts/install_python_uv.sh
 RUN /my_scripts/install_notojp.sh
