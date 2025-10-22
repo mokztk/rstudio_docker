@@ -36,9 +36,12 @@ strip /usr/local/lib/R/site-library/*/libs/*.so
 
 
 # reticulate が上記でインストールした python 3.12.12 を参照するようにする
-echo << EOF >> /etc/R/Renviron.site
-RETICULATE_PYTHON=/opt/uv/python/cpython-3.12.12-linux-x86_64-gnu/bin/python3.12
+cat << EOF >> /home/rstudio/.Renviron
+#RETICULATE_PYTHON=/opt/uv/python/cpython-3.12.12-linux-x86_64-gnu/bin/python3.12
+RETICULATE_PYTHON_ENV="/opt/venv"
+PATH="/opt/venv/bin:/opt/uv/bin:${PATH}"
 EOF
+chown rstudio:rstudio /home/rstudio/.Renviron
 
 # bash起動時にvenvを有効にする
 echo "source /opt/venv/bin/activate" >> /root/.bashrc

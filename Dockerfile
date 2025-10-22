@@ -52,9 +52,7 @@ RUN set -x \
     && /bin/bash -c "source /etc/default/locale" \
     && ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && echo "TZ=Asia/Tokyo" >> /home/rstudio/.Renviron \
-    && chown rstudio:rstudio /home/rstudio/.Renviron
+    && rm -rf /var/lib/apt/lists/*
 
 # install uv
 COPY --from=ghcr.io/astral-sh/uv:0.9.4 /uv /opt/uv/bin/
