@@ -4,7 +4,8 @@ set -x
 # uv を使った python セットアップ
 
 # uv 関係の保存先
-mkdir -p /opt/uv/bin
+mkdir -p /opt/uv/bin /opt/uv/cache /opt/uv/python
+chown -R root:staff /opt/uv
 chmod -R 777 /opt/uv
 
 # uv のインストール
@@ -34,6 +35,7 @@ rm -rf /var/lib/apt/lists/*
 rm -rf /tmp/downloaded_packages
 strip /usr/local/lib/R/site-library/*/libs/*.so
 
+rm -rf /opt/uv/cache/*
 
 # reticulate が上記でインストールした python 3.12.12 を参照するようにする
 cat << EOF >> /home/rstudio/.Renviron
