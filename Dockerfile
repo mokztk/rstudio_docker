@@ -9,8 +9,7 @@
 FROM rocker/r-ver:4.5.0 AS tidyverse_base
 
 # RStudio Server, S6 surpervisor, SSH server を入れる前の両者に共通の部分
-# rocker/tidyverse 相当のパッケージを導入（行番号は @8cd5d36 準拠）
-# pandoc, quarto は rocker/rstudio:4.5.0 と同じバージョンを指定
+# pandoc, quarto は rocker/rstudio:4.5.0 と同じバージョンを指定（行番号は @8cd5d36 準拠）
 
 #RUN sed -e "40,75d; 80,120d; 125,128d; 133,138d" /rocker_scripts/install_rstudio.sh | bash
 RUN set -x \
@@ -37,9 +36,6 @@ ENV DEFAULT_USER="rstudio" \
 RUN /rocker_scripts/default_user.sh "${DEFAULT_USER}"
 RUN /rocker_scripts/install_pandoc.sh
 RUN /rocker_scripts/install_quarto.sh
-
-# 容量の大きな database backend は RSQLite 以外省略（行番号は @5d33fd1 準拠）
-RUN sed -e 48d -e 52,56d /rocker_scripts/install_tidyverse.sh | bash
 
 # 日本語設定と必要なライブラリ（Rパッケージ用は別途スクリプト内で導入）
 # ${R_HOME}/etc/Renviron のタイムゾーン指定（Etc/UTC）も上書きしておく
