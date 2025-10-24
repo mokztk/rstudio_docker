@@ -13,10 +13,7 @@ apt-get install -y --no-install-recommends \
 Rscript -e "update.packages(ask = FALSE)"
 
 # pak::pak() で依存ライブラリもインストールしてくれるので apt install は省略
-# (4.5.0) pak で RccpEigen がうまくインストールできないので、ここで入れておく
-install2.r --error --ncpus -1 --skipinstalled \
-    pak \
-    RcppEigen
+Rscript -e "install.packages('pak')"
 
 # インストール補助の関数
 # 引数を１つずつ '' で囲んで , で繋いだものを pak::pak() に渡す
@@ -35,7 +32,7 @@ function pak_pak() {
 
 # rocker/tidyverse 相当のパッケージ
 # 容量の大きな database backend は RSQLite 以外省略（行番号は @5d33fd1 準拠）
-#RUN sed -e 48d -e 52,56d /rocker_scripts/install_tidyverse.sh | bash
+# sed -e 48d -e 52,56d /rocker_scripts/install_tidyverse.sh | bash
 
 pak_pak \
     tidyverse \
@@ -87,7 +84,10 @@ pak_pak \
     svglite \
     export \
     tidyplots \
-    tinytable
+    tinytable \
+    RcppEigen \
+    cpp11 \
+    plogr
 
 # R.cache (imported by styler) で使用するキャッシュディレクトリを準備
 mkdir -p /home/rstudio/.cache/R/R.cache
