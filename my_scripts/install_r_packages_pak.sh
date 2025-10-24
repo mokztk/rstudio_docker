@@ -25,13 +25,12 @@ function pak_pak() {
     local first=true
     for item in "$@"; do
         if ! $first; then
-            pkgs="$pkgs,"
+            pkgs="${pkgs},"
         fi
-        pkgs="$pkgs'$item'"
+        pkgs="${pkgs}'${item}'"
         first=false
     done
-    local code="pak::pak(c(${pkgs}))"
-    Rscript -e "${code}"
+    Rscript -e "pak::pak(c(${pkgs}))"
 }
 
 # rocker/tidyverse 相当のパッケージ
@@ -96,7 +95,6 @@ chown -R rstudio:rstudio /home/rstudio/.cache
 
 # Clean up
 Rscript -e "pak::pak_cleanup(force = TRUE)"
-strip /usr/local/lib/R/site-library/*/libs/*.so
 rm -rf /tmp/downloaded_packages
 rm -rf /tmp/Rtmp*
 strip /usr/local/lib/R/site-library/*/libs/*.so
