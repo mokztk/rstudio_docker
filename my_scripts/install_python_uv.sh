@@ -59,6 +59,15 @@ fi
 EOF
 chown rstudio:rstudio /home/rstudio/.bash_profile
 
+cat << EOF >> /home/rstudio/.bashrc
+
+# add uv to PATH
+case ":\$PATH:" in
+  *"/opt/uv/bin"*) ;;
+  *) export PATH="/opt/uv/bin:\$PATH" ;;
+esac
+EOF
+
 # # radianの設定
 # cat << EOF > /home/rstudio/.radian_profile
 # #options(radian.color_scheme = "monokai")
