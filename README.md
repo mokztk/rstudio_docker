@@ -9,14 +9,14 @@
 - `reticulate` で最低限の python 連携も使用できるようにする
 - [rocker-org/rocker-versioned2](https://github.com/rocker-org/rocker-versioned2) のように、目的別のスクリプトを使って Dockerfile 自体は極力シンプルにしてみる
 
-```bash
+```sell
 # RStudio server, SSH server まとめて作成・起動
 docker compose build
 docker compose up -d
 
 # 個別に build
-docker compose rstudio
-docker compose ssh
+docker compose build rstudio
+docker compose build ssh
 
 # または、docker compose を使わずに個別 build する場合
 docker image build --target rstudio -t "mokztk/rstudio:4.5.0" .
@@ -70,7 +70,7 @@ arm64 が置かれていないミラーサーバーも多いので変更しな�
 
 [radian: A 21 century R console](https://github.com/randy3k/radian) は使用頻度が減ったのでインストールしていないが、使用する場合は bash ターミナルで
 
-```bash
+```shell
 uv pip install radian
 
 # python -m pip install radian より高速
