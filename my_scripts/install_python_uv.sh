@@ -47,12 +47,12 @@ chown rstudio:rstudio /home/rstudio/.Renviron
 # RStudio server で起動した R セッションでも uv, python にパスが通るようにする
 cat << EOF >> /home/rstudio/.Rprofile
 # add uv to PATH
-if (!(strsplit(Sys.getenv("PATH"), ":") |> grepl(pattern = "/opt/uv/bin", x = _))) {
+if (!("/opt/uv/bin" %in% unlist(strsplit(Sys.getenv("PATH"), ":")))) {
   Sys.setenv(PATH = paste0("/opt/uv/bin:", Sys.getenv("PATH")))
 }
 
 # add python to PATH
-if (!(strsplit(Sys.getenv("PATH"), ":") |> grepl(pattern = "/opt/venv/bin", x = _))) {
+if (!("/opt/venv/bin" %in% unlist(strsplit(Sys.getenv("PATH"), ":")))) {
   Sys.setenv(PATH = paste0("/opt/venv/bin:", Sys.getenv("PATH")))
 }
 EOF
@@ -73,7 +73,6 @@ EOF
 chown rstudio:rstudio /home/rstudio/.bash_profile
 
 cat << EOF >> /home/rstudio/.bashrc
-
 # add uv to PATH
 case ":\$PATH:" in
   *"/opt/uv/bin"*) ;;
