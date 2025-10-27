@@ -41,9 +41,22 @@ rm -rf /opt/uv/cache/*
 cat << EOF >> /home/rstudio/.Renviron
 #RETICULATE_PYTHON=/opt/uv/python/cpython-3.12.12-linux-x86_64-gnu/bin/python3.12
 RETICULATE_PYTHON_ENV="/opt/venv"
-PATH="/opt/venv/bin:/opt/uv/bin:${PATH}"
 EOF
 chown rstudio:rstudio /home/rstudio/.Renviron
+
+# RStudio server で起動した R セッションでも uv, python にパスが通るようにする
+cat << EOF >> /home/rstudio/.Rprofile
+# add uv to PATH
+if (!(strsplit(Sys.getenv("PATH"), ":") |> grepl(pattern = "/opt/uv/bin", x = _))) {
+  Sys.setenv(PATH = paste0("/opt/uv/bin:", Sys.getenv("PATH")))
+}
+
+# add python to PATH
+if (!(strsplit(Sys.getenv("PATH"), ":") |> grepl(pattern = "/opt/venv/bin", x = _))) {
+  Sys.setenv(PATH = paste0("/opt/venv/bin:", Sys.getenv("PATH")))
+}
+EOF
+chown rstudio:rstudio /home/rstudio/.Rprofile
 
 # bash起動時にvenvを有効にする
 echo "source /opt/venv/bin/activate" >> /root/.bashrc
