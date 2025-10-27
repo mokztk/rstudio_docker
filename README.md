@@ -5,18 +5,18 @@
 - 使用方法別に、2つのイメージを生成
     - **RStudio server**: rocker project オリジナルのインストールスクリプトで rocker/rstudio 相当の機能を追加
     - **SSH server**: RStudio server は導入せず、[Positron](https://positron.posit.co/) などから remote SSH 接続するため SSH server を起動
-- CLI作業用に、[radian: A 21 century R console](https://github.com/randy3k/radian) と [Microsoft Edit](https://github.com/microsoft/edit) を追加する
+- CLI作業用に [Microsoft Edit](https://github.com/microsoft/edit) を追加する
 - `reticulate` で最低限の python 連携も使用できるようにする
 - [rocker-org/rocker-versioned2](https://github.com/rocker-org/rocker-versioned2) のように、目的別のスクリプトを使って Dockerfile 自体は極力シンプルにしてみる
 
-```
+```sell
 # RStudio server, SSH server まとめて作成・起動
 docker compose build
 docker compose up -d
 
 # 個別に build
-docker compose rstudio
-docker compose ssh
+docker compose build rstudio
+docker compose build ssh
 
 # または、docker compose を使わずに個別 build する場合
 docker image build --target rstudio -t "mokztk/rstudio:4.5.0" .
@@ -45,29 +45,35 @@ arm64 が置かれていないミラーサーバーも多いので変更しな�
         - serif/sans/monospace の標準日本語フォントとして設定
         - 過去コードの文字化け回避のため、Noto Sans/Serif CJK JP を Noto Sans/Serif JP の別名として登録しておく
     - **[UDEV Gothic](https://github.com/yuru7/udev-gothic)**
-        - BIZ UD Gothic + JetBrains Mono の合成フォント
+        - @tawara_san 氏作の BIZ UD Gothic + JetBrains Mono の合成フォント
         - 半角:全角 3:5版ではなく、通常の1:2でリガチャ有効のバージョン（UDEVGothicLG-*.ttf）を使用
+        - RStudio Serverのエディタ用カスタムフォントとして導入
+    - **[Mint Mono](https://github.com/yuru7/mint-mono)**
+        - @tawara_san 氏作の Intel One Mono と Circle M+ 等の合成フォント
+        - 半角:全角 3:5版ではなく、通常の1:2のバージョン（MintMono-*.ttf）を使用。リガチャなし
         - RStudio Serverのエディタ用カスタムフォントとして導入
 
 ### R の頻用パッケージ
 
 - [インストール済みのパッケージ一覧](package_list.md)
-- 容量節約のため、`dependencies = NA` の指定とし、インストール後にDLしたアーカイブは削除
-- rockerのスクリプトに倣い、インストール後にRSPMのバイナリパッケージで導入された *.so を整理
+- インストールの高速化、システム依存パッケージの導入をスムーズにするため `pak::pak()` を活用
+- rockerのスクリプトに倣い、インストール後にDLしたアーカイブや導入された *.so を整理
 
-### Python3 & [radian: A 21 century R console](https://github.com/randy3k/radian)
+### Python3
 
-- rocker project で用意されている `/rocker_scripts/install_python.sh` を利用して Python3 をインストール
-- 上記スクリプトで作成される仮想環境 `/opt/venv` に以下をインストールする
+- インストール高速化のため、[uv](https://docs.astral.sh/uv/) を導入
+- 公式の `/rocker_scripts/install_python.sh` と同様に仮想環境 `/opt/venv` を作る（プロジェクトとしての `uv init` はなし）
     - `pansdas` (Numpy)
     - `seaborn` (Matplotlib)
-    - `radian`
-    - `jedi` （radian でのコード補完に必要）
+- `reticulate` 1.41 以降の使い捨て uv 仮想環境は rocker イメージでは上手く動かない模様
+    - `reticulate` は上記仮想環境の python を使用するように設定（`RETICULATE_PYTHON_ENV="/opt/venv"`）
 
-radian をホストPCで使うときは
+[radian: A 21 century R console](https://github.com/randy3k/radian) は使用頻度が減ったのでインストールしていないが、使用する場合は bash ターミナルで
 
-```
-docker exec -it <container name> /opt/venv/bin/radian
+```shell
+uv pip install radian
+
+# python -m pip install radian より高速
 ```
 
 ### Node.js / npm / pnpm
@@ -124,3 +130,4 @@ docker exec -it <container name> /opt/venv/bin/radian
 - **2025-03-06** 🔖[4.4.2_2025Mar](https://github.com/mokztk/RStudio_docker/releases/tag/4.4.2_2025Mar) : `rocker/rstudio:4.4.2` ベースに更新
 - **2025-06-15** 🔖[4.5.0_2025Jun](https://github.com/mokztk/RStudio_docker/releases/tag/4.5.0_2025Jun) : `rocker/rstudio:4.5.0` ベースに更新。remote SSH接続できるよう設定を追加
 - **2025-10-15** RStudio server版（こちらからは remote SSH 接続を削除）と remote SSH 版を一本化
+- **2025-10-24** イメージ容量より速度、管理効率を優先して `pak`, `uv` によるインストールに変更
