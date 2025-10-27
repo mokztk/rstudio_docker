@@ -1,54 +1,42 @@
 # rocker/r-ver:4.5.0 をベースに共通部分を作ってから RStudio server, SSH server に分岐
-#   ENV CRAN="https://p3m.dev/cran/__linux__/noble/2025-06-12"
-
-# rocker/tidyverse:4.5.0 の Dockerfile を参考にベースを構築
+#  ENV CRAN="https://p3m.dev/cran/__linux__/noble/2025-06-12"
 #  https://github.com/rocker-org/rocker-versioned2/blob/master/dockerfiles/r-ver_4.5.0.Dockerfile
 #  https://github.com/rocker-org/rocker-versioned2/blob/master/dockerfiles/rstudio_4.5.0.Dockerfile
 #  https://github.com/rocker-org/rocker-versioned2/blob/master/dockerfiles/tidyverse_4.5.0.Dockerfile
 
-FROM rocker/r-ver:4.5.0 AS tidyverse_base
-
 # RStudio Server, S6 surpervisor, SSH server を入れる前の両者に共通の部分
-# pandoc, quarto は rocker/rstudio:4.5.0 と同じバージョンを指定（行番号は @8cd5d36 準拠）
 
-#RUN sed -e "40,75d; 80,120d; 125,128d; 133,138d" /rocker_scripts/install_rstudio.sh | bash
-RUN set -x \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends \
-        ca-certificates \
-        gdebi-core \
-        git \
-        libclang-dev \
-        libssl-dev \
-        lsb-release \
-        psmisc \
-        pwgen \
-        sudo \
-        wget \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && mkdir -p /etc/R
-
-ENV DEFAULT_USER="rstudio" \
-    PANDOC_VERSION="3.7.0.2" \
-    QUARTO_VERSION="1.6.42"
-
-RUN /rocker_scripts/default_user.sh "${DEFAULT_USER}"
-RUN /rocker_scripts/install_pandoc.sh
-RUN /rocker_scripts/install_quarto.sh
+FROM rocker/r-ver:4.5.0 AS tidyverse_base
 
 # 日本語設定と必要なライブラリ（Rパッケージ用は別途スクリプト内で導入）
 # ${R_HOME}/etc/Renviron のタイムゾーン指定（Etc/UTC）も上書きしておく
 RUN set -x \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        git \
+        sudo \
+        wget \
+        zstd \
         language-pack-ja-base \
         ssh \
     && /usr/sbin/update-locale LANG=ja_JP.UTF-8 LANGUAGE="ja_JP:ja" \
     && /bin/bash -c "source /etc/default/locale" \
     && ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /etc/R
+
+# pandoc, quarto は rocker/rstudio:4.5.0 と同じバージョンを指定
+# wget, ca-certicifates は導入済みのため apt の処理はスキップ（行番号は @8cd5d36 準拠）
+
+ENV DEFAULT_USER="rstudio" \
+    PANDOC_VERSION="3.7.0.2" \
+    QUARTO_VERSION="1.6.42"
+
+RUN /rocker_scripts/default_user.sh "${DEFAULT_USER}"
+RUN sed -e "16,26d" /rocker_scripts/install_pandoc.sh | bash
+RUN sed -e "21,31d" /rocker_scripts/install_quarto.sh | bash
 
 # install uv
 COPY --from=ghcr.io/astral-sh/uv:0.9.4 /uv /opt/uv/bin/
@@ -70,8 +58,8 @@ COPY --chown=rstudio:rstudio utils /home/rstudio/utils
 
 CMD ["R"]
 
+
 # 共通部分をベースにRStudio server等を追加する
-#   ENV CRAN="https://p3m.dev/cran/__linux__/noble/2025-06-12"
 
 FROM tidyverse_base AS rstudio
 
@@ -95,8 +83,8 @@ ENV LANG=ja_JP.UTF-8 \
 EXPOSE 8787
 CMD ["/init"]
 
-# 共通部分をベースに、SSH server等を追加する
-#   ENV CRAN="https://p3m.dev/cran/__linux__/noble/2025-06-12"
+
+# 共通部分をベースに、SSH server を追加する
 
 FROM tidyverse_base AS ssh
 
