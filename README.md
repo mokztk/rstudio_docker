@@ -19,12 +19,12 @@ docker compose build rstudio
 docker compose build ssh
 
 # または、docker compose を使わずに個別 build する場合
-docker image build --target rstudio -t "mokztk/rstudio:4.5.0" .
-docker image build --target ssh -t "mokztk/r_remote:4.5.0" .
+docker image build --target rstudio -t "mokztk/rstudio:4.5.1" .
+docker image build --target ssh -t "mokztk/r_remote:4.5.1" .
 
 # 個別に起動
-docker run --rm -d -p 8787:8787 --name rstudio mokztk/rstudio:4.5.0
-docker run --rm -d -p 2222:22 --name r_remote mokztk/r_remote:4.5.0
+docker run --rm -d -p 8787:8787 --name rstudio mokztk/rstudio:4.5.1
+docker run --rm -d -p 2222:22 --name r_remote mokztk/r_remote:4.5.1
 ```
 
 ## 詳細
@@ -80,7 +80,7 @@ uv pip install radian
 
 [Gemini CLI](https://github.com/google-gemini/gemini-cli) などを導入できるよう、 n（Node.js のバージョンマネージャー）経由で Ubuntu の apt にあるバージョンより新しいものを導入
 
-- 2025-06現在の LTS である Node v22系＋ npm v10系
+- 2025-10-30 現在の LTS である Node v24系＋ npm v11系
 - [pnpm](https://pnpm.io/ja/): ユーザー rstudio が利用する場合、リリース後1週間以上経過したパッケージのみに制限
 
 ### [Microsoft Edit](https://github.com/microsoft/edit)
@@ -130,4 +130,4 @@ uv pip install radian
 - **2025-03-06** 🔖[4.4.2_2025Mar](https://github.com/mokztk/RStudio_docker/releases/tag/4.4.2_2025Mar) : `rocker/rstudio:4.4.2` ベースに更新
 - **2025-06-15** 🔖[4.5.0_2025Jun](https://github.com/mokztk/RStudio_docker/releases/tag/4.5.0_2025Jun) : `rocker/rstudio:4.5.0` ベースに更新。remote SSH接続できるよう設定を追加
 - **2025-10-15** RStudio server版（こちらからは remote SSH 接続を削除）と remote SSH 版を一本化
-- **2025-10-24** イメージ容量より速度、管理効率を優先して `pak`, `uv` によるインストールに変更
+- **2025-11-04** 🔖[4.5.1_2025Nov](https://github.com/mokztk/RStudio_docker/releases/tag/4.5.1_2025Nov) : `rocker/r-ver:4.5.1` ベースに更新

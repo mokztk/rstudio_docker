@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
       target: rstudio
-    image: "mokztk/rstudio:4.5.0"
+    image: "mokztk/rstudio:4.5.1"
     ports:
       - "8787:8787"
     networks:
@@ -19,7 +19,7 @@ services:
       context: .
       dockerfile: Dockerfile
       target: ssh
-    image: "mokztk/r_remote:4.5.0"
+    image: "mokztk/r_remote:4.5.1"
     ports:
       - "22222:22"
     networks:
