@@ -1,12 +1,12 @@
-# rocker/r-ver:4.5.0 をベースに共通部分を作ってから RStudio server, SSH server に分岐
-#  ENV CRAN="https://p3m.dev/cran/__linux__/noble/2025-06-12"
-#  https://github.com/rocker-org/rocker-versioned2/blob/master/dockerfiles/r-ver_4.5.0.Dockerfile
-#  https://github.com/rocker-org/rocker-versioned2/blob/master/dockerfiles/rstudio_4.5.0.Dockerfile
-#  https://github.com/rocker-org/rocker-versioned2/blob/master/dockerfiles/tidyverse_4.5.0.Dockerfile
+# rocker/r-ver:4.5.1 をベースに共通部分を作ってから RStudio server, SSH server に分岐
+#  ENV CRAN="https://p3m.dev/cran/__linux__/noble/2025-10-30"
+#  https://github.com/rocker-org/rocker-versioned2/blob/master/dockerfiles/r-ver_4.5.1.Dockerfile
+#  https://github.com/rocker-org/rocker-versioned2/blob/master/dockerfiles/rstudio_4.5.1.Dockerfile
+#  https://github.com/rocker-org/rocker-versioned2/blob/master/dockerfiles/tidyverse_4.5.1.Dockerfile
 
 # RStudio Server, S6 surpervisor, SSH server を入れる前の両者に共通の部分
 
-FROM rocker/r-ver:4.5.0 AS tidyverse_base
+FROM rocker/r-ver:4.5.1 AS tidyverse_base
 
 # 日本語設定と必要なライブラリ（Rパッケージ用は別途スクリプト内で導入）
 # ${R_HOME}/etc/Renviron のタイムゾーン指定（Etc/UTC）も上書きしておく
@@ -27,19 +27,19 @@ RUN set -x \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /etc/R
 
-# pandoc, quarto は rocker/rstudio:4.5.0 と同じバージョンを指定
-# wget, ca-certicifates は導入済みのため apt の処理はスキップ（行番号は @8cd5d36 準拠）
+# pandoc, quarto は rocker/rstudio:4.5.1 と同じバージョンを指定
+# wget, ca-certicifates は導入済みのため apt の処理はスキップ（行番号は @07c155e 準拠）
 
 ENV DEFAULT_USER="rstudio" \
-    PANDOC_VERSION="3.7.0.2" \
-    QUARTO_VERSION="1.6.42"
+    PANDOC_VERSION="3.8.2.1" \
+    QUARTO_VERSION="1.7.32"
 
 RUN /rocker_scripts/default_user.sh "${DEFAULT_USER}"
 RUN sed -e "16,26d" /rocker_scripts/install_pandoc.sh | bash
 RUN sed -e "21,31d" /rocker_scripts/install_quarto.sh | bash
 
 # install uv
-COPY --from=ghcr.io/astral-sh/uv:0.9.4 /uv /opt/uv/bin/
+COPY --from=ghcr.io/astral-sh/uv:0.9.6 /uv /opt/uv/bin/
 
 # setup script
 # 各スクリプトは改行コード LF(UNIX) でないとエラーになる
@@ -63,11 +63,11 @@ CMD ["R"]
 
 FROM tidyverse_base AS rstudio
 
-# rocker/rstudio:4.5.0 の Dockerfile より流用
-#  https://github.com/rocker-org/rocker-versioned2/blob/master/dockerfiles/r-ver_4.5.0.Dockerfile
+# rocker/rstudio:4.5.1 の Dockerfile より流用
+#  https://github.com/rocker-org/rocker-versioned2/blob/master/dockerfiles/r-ver_4.5.1.Dockerfile
 
 ENV S6_VERSION="v2.1.0.2" \
-    RSTUDIO_VERSION="2025.05.1+513" \
+    RSTUDIO_VERSION="2025.09.2+418" \
     DEFAULT_USER="rstudio"
 
 RUN /rocker_scripts/install_rstudio.sh
