@@ -26,10 +26,12 @@ format:
           #show heading: it => [
             #pad(bottom: 10pt, left: -0.5em, it)
           ]
-          // コードブロック内の日本語フォント、プログラミングフォント
+          // コードブロック内（および見出し）の各種フォント
           #show block: it => [
             #set text(
-              font: ("DejaVu Sans Mono", "Noto Sans Mono CJK JP"),
+              font: ("DejaVu Sans Mono",
+                     "Noto Sans Mono CJK JP",
+                     "New Computer Modern Math"),
               fallback: true
             )
             #it
