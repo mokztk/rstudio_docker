@@ -1,0 +1,10 @@
+# ignore all
+**
+
+# white list
+!Dockerfile
+!.dockerignore
+!.docker-compose.yml
+!my_scripts/*
+!utils/*
+
