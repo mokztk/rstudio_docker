@@ -13,8 +13,7 @@ FROM rocker/r-ver:4.5.1 AS tidyverse_base
 # 以降も何度か apt-get を使うので BuildKit のキャッシュマウント機能を使う
 RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
     --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    set -x \
-    && apt-get update \
+    apt-get update \
     && apt-get install -y --no-install-recommends \
         ca-certificates \
         git \
@@ -49,21 +48,17 @@ COPY --from=ghcr.io/astral-sh/uv:0.9.6 /uv /opt/uv/bin/
 # setup script
 # 各スクリプトは改行コード LF(UNIX) でないとエラーになる
 COPY my_scripts /my_scripts
-RUN chmod 775 my_scripts/*
 
 RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
     --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/root/.cache/R,sharing=locked \
     --mount=type=cache,target=/tmp,sharing=locked \
-    bash /my_scripts/install_r_packages_pak.sh
-
-RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/tmp,sharing=locked \
-    bash /my_scripts/install_python_uv.sh
-
-RUN /my_scripts/install_notojp.sh
-RUN /my_scripts/install_msedit.sh
-RUN /my_scripts/install_nodejs.sh
+    chmod 775 my_scripts/* \
+    && bash /my_scripts/install_r_packages_pak.sh \
+    && bash /my_scripts/install_python_uv.sh \
+    && bash /my_scripts/install_nodejs.sh \
+    && bash /my_scripts/install_notojp.sh \
+    && bash /my_scripts/install_msedit.sh
 
 # 検証用ファイル
 COPY --chown=rstudio:rstudio utils /home/rstudio/utils
