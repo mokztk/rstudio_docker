@@ -31,8 +31,8 @@ uv pip install pip pandas seaborn
 Rscript -e "install.packages('pak'); pak::pak('reticulate')"
 
 # clean up
-rm -rf /var/lib/apt/lists/*
-rm -rf /tmp/downloaded_packages
+#rm -rf /var/lib/apt/lists/*
+#rm -rf /tmp/downloaded_packages
 strip /usr/local/lib/R/site-library/*/libs/*.so
 
 rm -rf /opt/uv/cache/*
