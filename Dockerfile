@@ -10,7 +10,10 @@ FROM rocker/r-ver:4.5.1 AS tidyverse_base
 
 # 日本語設定と必要なライブラリ（Rパッケージ用は別途スクリプト内で導入）
 # ${R_HOME}/etc/Renviron のタイムゾーン指定（Etc/UTC）も上書きしておく
-RUN set -x \
+# 以降も何度か apt-get を使うので BuildKit のキャッシュマウント機能を使う
+RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    set -x \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
         ca-certificates \
@@ -24,7 +27,6 @@ RUN set -x \
     && /bin/bash -c "source /etc/default/locale" \
     && ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /etc/R
 
 # pandoc, quarto は rocker/rstudio:4.5.1 と同じバージョンを指定
@@ -35,8 +37,11 @@ ENV DEFAULT_USER="rstudio" \
     QUARTO_VERSION="1.7.32"
 
 RUN /rocker_scripts/default_user.sh "${DEFAULT_USER}"
-RUN sed -e "16,26d" /rocker_scripts/install_pandoc.sh | bash
-RUN sed -e "21,31d" /rocker_scripts/install_quarto.sh | bash
+
+RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    sed -e "16,26d" -e "85d" /rocker_scripts/install_pandoc.sh | bash \
+    && sed -e "21,31d" -e "74d" /rocker_scripts/install_quarto.sh | bash
 
 # install uv
 COPY --from=ghcr.io/astral-sh/uv:0.9.6 /uv /opt/uv/bin/
@@ -45,10 +50,17 @@ COPY --from=ghcr.io/astral-sh/uv:0.9.6 /uv /opt/uv/bin/
 # 各スクリプトは改行コード LF(UNIX) でないとエラーになる
 COPY my_scripts /my_scripts
 RUN chmod 775 my_scripts/*
-#RUN /my_scripts/install_r_packages.sh
-RUN /my_scripts/install_r_packages_pak.sh
-#RUN /my_scripts/install_radian.sh
-RUN /my_scripts/install_python_uv.sh
+
+RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/tmp,sharing=locked \
+    bash /my_scripts/install_r_packages_pak.sh
+
+RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/tmp,sharing=locked \
+    bash /my_scripts/install_python_uv.sh
+
 RUN /my_scripts/install_notojp.sh
 RUN /my_scripts/install_msedit.sh
 RUN /my_scripts/install_nodejs.sh
@@ -70,7 +82,10 @@ ENV S6_VERSION="v2.1.0.2" \
     RSTUDIO_VERSION="2025.09.2+418" \
     DEFAULT_USER="rstudio"
 
-RUN /rocker_scripts/install_rstudio.sh
+RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    sed -e "131d" /rocker_scripts/install_rstudio.sh | bash
+
 RUN /my_scripts/install_coding_fonts.sh
 
 ENV LANG=ja_JP.UTF-8 \
