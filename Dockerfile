@@ -22,6 +22,8 @@ RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
         zstd \
         language-pack-ja-base \
         ssh \
+        unison \
+        fswatch \
     && /usr/sbin/update-locale LANG=ja_JP.UTF-8 LANGUAGE="ja_JP:ja" \
     && /bin/bash -c "source /etc/default/locale" \
     && ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime \
