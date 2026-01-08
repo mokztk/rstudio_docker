@@ -44,7 +44,7 @@ RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
     && sed -e "21,31d" -e "74d" /rocker_scripts/install_quarto.sh | bash
 
 # install uv
-COPY --from=ghcr.io/astral-sh/uv:0.9.6 /uv /opt/uv/bin/
+COPY --from=ghcr.io/astral-sh/uv:0.9.6 /uv /uvx /opt/uv/bin/
 
 # setup script
 # 各スクリプトは改行コード LF(UNIX) でないとエラーになる
