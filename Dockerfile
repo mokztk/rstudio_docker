@@ -35,7 +35,8 @@ ENV DEFAULT_USER="rstudio" \
     PANDOC_VERSION="3.8.2.1" \
     QUARTO_VERSION="1.7.32"
 
-RUN /rocker_scripts/default_user.sh "${DEFAULT_USER}"
+RUN /rocker_scripts/default_user.sh "${DEFAULT_USER}" \
+    && gpasswd -a "${DEFAULT_USER} sudo
 
 RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
     --mount=type=cache,target=/var/cache/apt,sharing=locked \
