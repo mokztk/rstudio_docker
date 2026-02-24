@@ -1,10 +1,10 @@
-name: Build Docker Image
+name: Build Docker Images
 
 on:
   workflow_dispatch:
     inputs:
       image_tag:
-        description: "Release tag"
+        description: "Release tag (e.g. 4.5.1_2026Feb)"
         required: true
   push:
     branches:
@@ -20,7 +20,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - uses: docker/setup-qemu-action@v3
+
       - uses: docker/setup-buildx-action@v3
 
       - name: Login to GHCR
@@ -39,12 +41,34 @@ jobs:
             echo "TAG=dev" >> $GITHUB_OUTPUT
           fi
 
-      - name: Build and Push
+      # -----------------------------
+      # rstudio image
+      # -----------------------------
+      - name: Build and Push rstudio
         uses: docker/build-push-action@v5
         with:
           context: .
+          target: rstudio
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/${{ github.repository }}:${{ steps.vars.outputs.TAG }}
+          tags: ghcr.io/${{ github.repository }}:${{ steps.vars.outputs.TAG }}-rstudio
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          provenance: false
+          sbom: false
+
+      # -----------------------------
+      # ssh image
+      # -----------------------------
+      - name: Build and Push ssh
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          target: ssh
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ghcr.io/${{ github.repository }}:${{ steps.vars.outputs.TAG }}-ssh
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: false
+          sbom: false
