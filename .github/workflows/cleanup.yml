@@ -13,26 +13,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Delete old dev images and untagged images
+      # untagged は削除
+      - name: Delete untagged images
         uses: actions/delete-package-versions@v5
         with:
           package-name: rstudio_docker
           package-type: container
-
-          # untagged を全削除
           delete-only-untagged-versions: true
 
-          # dev-rstudio は1つだけ残す
-          ignore-versions: '^dev-rstudio$'
-          min-versions-to-keep: 1
-          delete-only-pre-release-versions: false
-
-      - name: Delete old ssh-dev images
+      # rstudio-dev を1つだけ残す
+      - name: Cleanup old rstudio-dev
         uses: actions/delete-package-versions@v5
         with:
           package-name: rstudio_docker
           package-type: container
-
-          ignore-versions: '^dev-ssh$'
-          min-versions-to-keep: 1
           delete-only-pre-release-versions: false
+          delete-only-versions: '^dev-rstudio$'
+          min-versions-to-keep: 1
+
+      # ssh-dev を1つだけ残す
+      - name: Cleanup old ssh-dev
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: rstudio_docker
+          package-type: container
+          delete-only-pre-release-versions: false
+          delete-only-versions: '^dev-ssh$'
+          min-versions-to-keep: 1
