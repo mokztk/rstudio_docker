@@ -1,10 +1,10 @@
-name: Cleanup GHCR (Manual Only)
+name: Cleanup GHCR (ID Safe)
 
 on:
   workflow_dispatch:
     inputs:
       execute_delete:
-        description: "true = delete / false = preview only"
+        description: "true = delete / false = preview"
         required: true
         default: "false"
 
@@ -17,76 +17,69 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install jq
+      - name: Install gh + jq
         run: |
           sudo apt-get update
           sudo apt-get install -y jq
 
       # ==========================================================
-      # 🔎 PREVIEW (デフォルト)
+      #  PREVIEW
       # ==========================================================
-      - name: Preview package versions
-        if: github.event.inputs.execute_delete != 'true'
+      - name: Preview versions
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "========================================"
-          echo "GHCR VERSION PREVIEW (NO DELETE)"
-          echo "========================================"
-
-          echo ""
-          echo "---- ALL VERSIONS ----"
+          echo "==== ALL VERSIONS ===="
           gh api \
             /users/${{ github.repository_owner }}/packages/container/rstudio_docker/versions \
             --paginate \
             | jq '.[] | {id: .id, tags: .metadata.container.tags}'
 
-          echo ""
-          echo "---- UNTAGGED (will be deleted) ----"
+          echo "==== UNTAGGED (target) ===="
           gh api \
             /users/${{ github.repository_owner }}/packages/container/rstudio_docker/versions \
             --paginate \
             | jq '.[] | select(.metadata.container.tags | length == 0) | {id: .id}'
 
-          echo ""
-          echo "---- dev-rstudio ----"
+          echo "==== dev-rstudio ===="
           gh api \
             /users/${{ github.repository_owner }}/packages/container/rstudio_docker/versions \
             --paginate \
             | jq '.[] | select(.metadata.container.tags[]? == "dev-rstudio") | {id: .id}'
 
-          echo ""
-          echo "---- dev-ssh ----"
+          echo "==== dev-ssh ===="
           gh api \
             /users/${{ github.repository_owner }}/packages/container/rstudio_docker/versions \
             --paginate \
             | jq '.[] | select(.metadata.container.tags[]? == "dev-ssh") | {id: .id}'
 
       # ==========================================================
-      # 🗑 DELETE（明示指定時のみ）
+      #  COLLECT IDS (delete時のみ)
       # ==========================================================
-      - name: Delete untagged images
+      - name: Collect delete IDs
+        id: collect
         if: github.event.inputs.execute_delete == 'true'
-        uses: actions/delete-package-versions@v5
-        with:
-          package-name: rstudio_docker
-          package-type: container
-          delete-only-untagged-versions: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          IDS=$(gh api \
+            /users/${{ github.repository_owner }}/packages/container/rstudio_docker/versions \
+            --paginate \
+            | jq -r '.[] | select(.metadata.container.tags | length == 0) | .id' \
+            | paste -sd "," -)
 
-      - name: Cleanup old dev-rstudio
-        if: github.event.inputs.execute_delete == 'true'
-        uses: actions/delete-package-versions@v5
-        with:
-          package-name: rstudio_docker
-          package-type: container
-          delete-only-versions: '^dev-rstudio$'
-          min-versions-to-keep: 1
+          echo "IDS=$IDS" >> $GITHUB_OUTPUT
 
-      - name: Cleanup old dev-ssh
+          echo "Delete target IDs:"
+          echo "$IDS"
+
+      # ==========================================================
+      #  DELETE (明示指定時のみ)
+      # ==========================================================
+      - name: Delete package versions
         if: github.event.inputs.execute_delete == 'true'
         uses: actions/delete-package-versions@v5
         with:
           package-name: rstudio_docker
           package-type: container
-          delete-only-versions: '^dev-ssh$'
-          min-versions-to-keep: 1
+          package-version-ids: ${{ steps.collect.outputs.IDS }}
