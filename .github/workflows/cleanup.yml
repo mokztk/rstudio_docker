@@ -2,7 +2,7 @@ name: Cleanup GHCR
 
 on:
   schedule:
-    - cron: '0 3 * * *'   # 毎日 03:00 UTC
+    - cron: '0 3 * * *'
   workflow_dispatch:
 
 permissions:
@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # untagged は削除
+      # untagged 削除
       - name: Delete untagged images
         uses: actions/delete-package-versions@v5
         with:
@@ -21,22 +21,20 @@ jobs:
           package-type: container
           delete-only-untagged-versions: true
 
-      # rstudio-dev を1つだけ残す
-      - name: Cleanup old rstudio-dev
+      # dev-rstudio の古い version だけ削除
+      - name: Cleanup dev-rstudio
         uses: actions/delete-package-versions@v5
         with:
           package-name: rstudio_docker
           package-type: container
-          delete-only-pre-release-versions: false
-          delete-only-versions: '^dev-rstudio$'
+          ignore-versions: '^(?!dev-rstudio$).*'
           min-versions-to-keep: 1
 
-      # ssh-dev を1つだけ残す
-      - name: Cleanup old ssh-dev
+      # dev-ssh の古い version だけ削除
+      - name: Cleanup dev-ssh
         uses: actions/delete-package-versions@v5
         with:
           package-name: rstudio_docker
           package-type: container
-          delete-only-pre-release-versions: false
-          delete-only-versions: '^dev-ssh$'
+          ignore-versions: '^(?!dev-ssh$).*'
           min-versions-to-keep: 1
