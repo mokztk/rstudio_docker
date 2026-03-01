@@ -82,7 +82,8 @@ ENV S6_VERSION="v2.1.0.2" \
 
 RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
     --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    sed -e "131d" /rocker_scripts/install_rstudio.sh | bash
+    apt-get update \
+    && sed -e "131d" /rocker_scripts/install_rstudio.sh | bash
 
 RUN /my_scripts/install_coding_fonts.sh
 
