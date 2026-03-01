@@ -6,7 +6,8 @@
 
 # RStudio Server, S6 surpervisor, SSH server を入れる前の両者に共通の部分
 
-FROM rocker/r-ver:4.5.1 AS tidyverse_base
+ARG TARGETARCH
+FROM --platform=$TARGETPLATFORM rocker/r-ver:4.5.1 AS tidyverse_base
 
 # 日本語設定と必要なライブラリ（Rパッケージ用は別途スクリプト内で導入）
 # ${R_HOME}/etc/Renviron のタイムゾーン指定（Etc/UTC）も上書きしておく
