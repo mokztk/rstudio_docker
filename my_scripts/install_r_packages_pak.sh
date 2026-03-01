@@ -95,8 +95,8 @@ chown -R rstudio:rstudio /home/rstudio/.cache
 
 # Clean up
 Rscript -e "pak::pak_cleanup(force = TRUE)"
-#rm -rf /tmp/downloaded_packages
-#rm -rf /tmp/Rtmp*
+rm -rf /tmp/downloaded_packages
+rm -rf /tmp/Rtmp*
 strip /usr/local/lib/R/site-library/*/libs/*.so
 
 apt-get clean

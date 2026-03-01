@@ -38,7 +38,8 @@ ENV DEFAULT_USER="rstudio" \
     QUARTO_VERSION="1.7.32"
 
 RUN /rocker_scripts/default_user.sh "${DEFAULT_USER}" \
-    && gpasswd -a "${DEFAULT_USER}" sudo
+    && echo "${DEFAULT_USER} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${DEFAULT_USER} \
+    && chmod 0440 /etc/sudoers.d/${DEFAULT_USER}
 
 RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
     --mount=type=cache,target=/var/cache/apt,sharing=locked \
@@ -55,7 +56,6 @@ COPY my_scripts /my_scripts
 RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
     --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/root/.cache/R,sharing=locked \
-    --mount=type=cache,target=/tmp,sharing=locked \
     chmod 775 my_scripts/* \
     && bash /my_scripts/install_r_packages_pak.sh \
     && bash /my_scripts/install_python_uv.sh \
@@ -86,6 +86,13 @@ RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
 
 RUN /my_scripts/install_coding_fonts.sh
 
+# pak でのインストールエラー対策
+# R_LIBS_USER に指定されているディレクトリを .libPaths() の先頭にする
+USER rstudio
+RUN Rscript -e 'dir.create(Sys.getenv("R_LIBS_USER"), recursive = TRUE)' \
+    && echo '.libPaths(c(Sys.getenv("R_LIBS_USER"), .Library.site, .Library))' >> /home/rstudio/.Rprofile
+
+USER root
 ENV LANG=ja_JP.UTF-8 \
     LC_ALL=ja_JP.UTF-8 \
     TZ=Asia/Tokyo \
@@ -93,6 +100,7 @@ ENV LANG=ja_JP.UTF-8 \
     DISABLE_AUTH=true \
     RUNROOTLESS=false
 
+WORKDIR /workspace
 EXPOSE 8787
 CMD ["/init"]
 
@@ -103,10 +111,18 @@ FROM tidyverse_base AS ssh
 
 RUN /my_scripts/setup_sshd.sh
 
+# pak でのインストールエラー対策
+# R_LIBS_USER に指定されているディレクトリを .libPaths() の先頭にする
+USER rstudio
+RUN Rscript -e 'dir.create(Sys.getenv("R_LIBS_USER"), recursive = TRUE)' \
+    && echo '.libPaths(c(Sys.getenv("R_LIBS_USER"), .Library.site, .Library))' >> /home/rstudio/.Rprofile
+
+USER root
 ENV LANG=ja_JP.UTF-8 \
     LC_ALL=ja_JP.UTF-8 \
     TZ=Asia/Tokyo
 
 # SSH server を起動
+WORKDIR /workspace
 EXPOSE 22
 CMD ["/usr/sbin/sshd", "-D"]

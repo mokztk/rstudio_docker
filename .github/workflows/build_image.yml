@@ -8,7 +8,11 @@ on:
         required: true
   push:
     branches:
-      - devel
+      - 'devel/*'
+      - 'feature/**'
+      - 'fix/**'
+    tags:
+      - '*'
 
 permissions:
   contents: read
@@ -37,6 +41,8 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "TAG=${{ github.event.inputs.image_tag }}" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            echo "TAG=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           else
             echo "TAG=dev" >> $GITHUB_OUTPUT
           fi
@@ -51,7 +57,7 @@ jobs:
           target: rstudio
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/${{ github.repository }}:${{ steps.vars.outputs.TAG }}-rstudio
+          tags: ghcr.io/${{ github.repository_owner }}/rstudio:${{ steps.vars.outputs.TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           provenance: false
@@ -67,7 +73,7 @@ jobs:
           target: ssh
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/${{ github.repository }}:${{ steps.vars.outputs.TAG }}-ssh
+          tags: ghcr.io/${{ github.repository_owner }}/r_remote:${{ steps.vars.outputs.TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           provenance: false
