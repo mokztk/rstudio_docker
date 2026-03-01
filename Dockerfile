@@ -87,6 +87,13 @@ RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
 
 RUN /my_scripts/install_coding_fonts.sh
 
+# pak でのインストールエラー対策
+# R_LIBS_USER に指定されているディレクトリを .libPaths() の先頭にする
+USER rstudio
+RUN Rscript -e 'dir.create(Sys.getenv("R_LIBS_USER"), recursive = TRUE)' \
+    && echo '.libPaths(c(Sys.getenv("R_LIBS_USER"), .Library.site, .Library))' >> /home/rstudio/.Rprofile
+
+USER root
 ENV LANG=ja_JP.UTF-8 \
     LC_ALL=ja_JP.UTF-8 \
     TZ=Asia/Tokyo \
@@ -105,6 +112,13 @@ FROM tidyverse_base AS ssh
 
 RUN /my_scripts/setup_sshd.sh
 
+# pak でのインストールエラー対策
+# R_LIBS_USER に指定されているディレクトリを .libPaths() の先頭にする
+USER rstudio
+RUN Rscript -e 'dir.create(Sys.getenv("R_LIBS_USER"), recursive = TRUE)' \
+    && echo '.libPaths(c(Sys.getenv("R_LIBS_USER"), .Library.site, .Library))' >> /home/rstudio/.Rprofile
+
+USER root
 ENV LANG=ja_JP.UTF-8 \
     LC_ALL=ja_JP.UTF-8 \
     TZ=Asia/Tokyo
