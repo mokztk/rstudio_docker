@@ -94,6 +94,7 @@ ENV LANG=ja_JP.UTF-8 \
     DISABLE_AUTH=true \
     RUNROOTLESS=false
 
+WORKDIR /workspace
 EXPOSE 8787
 CMD ["/init"]
 
@@ -109,5 +110,6 @@ ENV LANG=ja_JP.UTF-8 \
     TZ=Asia/Tokyo
 
 # SSH server を起動
+WORKDIR /workspace
 EXPOSE 22
 CMD ["/usr/sbin/sshd", "-D"]
