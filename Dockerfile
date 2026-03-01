@@ -56,7 +56,6 @@ COPY my_scripts /my_scripts
 RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
     --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/root/.cache/R,sharing=locked \
-    --mount=type=cache,target=/tmp,sharing=locked \
     chmod 775 my_scripts/* \
     && bash /my_scripts/install_r_packages_pak.sh \
     && bash /my_scripts/install_python_uv.sh \
